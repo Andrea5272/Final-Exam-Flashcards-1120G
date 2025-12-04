@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>History Flashcards</title>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 30px;
+  }
+  .container {
+    max-width: 700px;
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    padding: 24px 32px;
+    text-align: center;
+  }
+  h1 { margin-bottom: 10px; }
+  .progress { color: #475569; font-size: 0.9rem; margin-bottom: 8px; }
+  .term { font-size: 1.3rem; font-weight: 600; margin: 16px 0 8px; }
+  .definition { color: #64748b; font-size: 1rem; min-height: 60px; }
+  .controls {
+    display: flex; flex-wrap: wrap;
+    gap: 10px; justify-content: center; margin-top: 20px;
+  }
+  button {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  button:hover { background: #cbd5e1; }
+  button.primary { background: #3b82f6; color: white; }
+  button.green { background: #22c55e; color: white; }
+  footer { color: #94a3b8; font-size: 0.78rem; margin-top: 16px; }
+</style>
+
+</head>
+<body>
+<div class="container">
+  <h1>📚 History Flashcards</h1>
+  <div class="progress" id="progress">Card 1 of 1</div>
+  <div class="term" id="term">Loading…</div>
+  <div class="definition" id="definition">(Press Space or click “Show Answer”)</div>
+
+  <div class="controls">
+    <button id="showBtn" class="green">Show Answer</button>
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+    <button id="shuffleBtn">Shuffle (S)</button>
+    <button id="copyBtn">Copy for Quizlet</button>
+  </div>
+
+  <footer>← Previous · → Next · Space = Show/Hide · S = Shuffle</footer>
+</div>
+
+<script>
+const FLASHCARDS = [
+  { term: "Hoovervilles", definition: "Makeshift shantytowns constructed by unemployed Americans during the Great Depression, symbolizing widespread poverty and government inaction." },
+  { term: "New Deal", definition: "Franklin D. Roosevelt’s broad set of economic reforms and relief programs designed to combat the Great Depression and expand the federal government’s role in the economy." },
+  { term: "Social Security Act", definition: "A 1935 law establishing pensions for seniors, unemployment insurance, and welfare programs, redefining the government’s responsibility for social welfare." },
+  { term: "Pearl Harbor", definition: "Japan’s 1941 surprise attack on the U.S. base in Hawaii, prompting U.S. entry into World War II." },
+  { term: "Japanese Internment", definition: "The forced relocation and incarceration of over 110,000 Japanese Americans during WWII, justified as national security but later recognized as unconstitutional." },
+  { term: "Yalta Agreement", definition: "A 1945 Allied conference setting terms for postwar Europe, including dividing Germany and arranging Soviet entry into the war against Japan." },
+  { term: "Manhattan Project", definition: "The secret U.S. program that developed atomic weapons during WWII, headquartered in Los Alamos, New Mexico." },
+  { term: "D-Day", definition: "The Allied invasion of Normandy on June 6, 1944, opening a Western front and accelerating Nazi Germany’s defeat." },
+  { term: "The Holocaust", definition: "The systematic genocide in which Nazi Germany murdered six million Jews and millions of other persecuted groups during WWII." },
+  { term: "The Cold War", definition: "A geopolitical and ideological rivalry between the U.S. and the Soviet Union from the late 1940s to early 1990s." },
+  { term: "Duck and Cover", definition: "A Cold War civil defense campaign teaching Americans to take cover during a nuclear attack." },
+  { term: "The Truman Doctrine", definition: "A 1947 policy pledging U.S. support to nations resisting communism, marking the start of containment." },
+  { term: "The Marshall Plan", definition: "A massive U.S. program to rebuild Western Europe after WWII and counter Soviet influence." },
+  { term: "The Korean War", definition: "A conflict (1950–1953) in which the U.S. defended South Korea against communist North Korea, ending in a stalemate." },
+  { term: "The Red Scare/McCarthyism", definition: "A Cold War wave of anti-communist fear that led to investigations, blacklisting, and violations of civil liberties." },
+  { term: "Containment", definition: "A foreign policy strategy aimed at preventing the spread of communism." },
+  { term: "Mutually Assured Destruction", definition: "A nuclear deterrence doctrine asserting that atomic war would destroy both sides, discouraging conflict." },
+  { term: "North Atlantic Treaty Organization (NATO)", definition: "A 1949 military alliance among the U.S. and Western nations to deter Soviet aggression." },
+  { term: "Servicemen’s Readjustment Act", definition: "The 1944 GI Bill providing veterans education, housing, and job benefits, shaping postwar growth." },
+  { term: "Baby Boom", definition: "A surge in births from 1946–1964, driven by postwar prosperity." },
+  { term: "The Rise of Television", definition: "The spread of television after WWII, transforming entertainment, politics, and advertising." },
+  { term: "Beats", definition: "A 1950s artistic movement rejecting conformity and consumerism, influencing counterculture." },
+  { term: "Brown v. Board of Education", definition: "The 1954 Supreme Court decision ruling school segregation unconstitutional." },
+  { term: "The Little Rock Nine", definition: "Nine Black students who integrated Central High School in 1957 under federal protection." },
+  { term: "Sit-Ins", definition: "A civil rights protest tactic where participants occupied segregated spaces to demand integration." },
+  { term: "The Election of 1960", definition: "A close race highlighting the political power of television." },
+  { term: "Bay of Pigs", definition: "A failed 1961 CIA-backed invasion of Cuba by exiles trying to overthrow Castro." },
+  { term: "The Cuban Missile Crisis", definition: "A 1962 standoff over Soviet missiles in Cuba that nearly caused nuclear war." },
+  { term: "Freedom Rides", definition: "Activists who challenged segregated interstate bus travel, facing violent opposition." },
+  { term: "Martin Luther King Jr.", definition: "A civil rights leader advocating nonviolent protest to end segregation and racial injustice." },
+  { term: "Black Panther Party", definition: "A Black Power group advocating self-defense, racial pride, and community programs." },
+  { term: "Malcolm X", definition: "A Black nationalist leader who criticized integrationist strategies before moderating his views." },
+  { term: "National Organization for Women (NOW)", definition: "A feminist group founded in 1966 to pursue gender equality through legal and political activism." },
+  { term: "Roe v. Wade", definition: "The 1973 Supreme Court decision legalizing abortion nationwide." },
+  { term: "La Raza Unida", definition: "A Chicano political party promoting Latino political power and social reform." },
+  { term: "The American Indian Movement", definition: "A Native rights group formed in 1968 to challenge federal abuses and injustices." },
+  { term: "The Pentagon Papers", definition: "Leaked documents showing government deception in the Vietnam War." },
+  { term: "Watergate", definition: "A political scandal that led to Nixon’s resignation." },
+  { term: "The Equal Rights Amendment (ERA)", definition: "A proposed amendment for gender equality that failed to be ratified." },
+  { term: "Acquired immune deficiency syndrome (AIDS)", definition: "An epidemic beginning in the 1980s that exposed government inaction and fueled activism." },
+  { term: "Solidarity", definition: "A Polish labor movement that challenged communist rule." },
+  { term: "Globalization", definition: "The increasing integration of global economies, cultures, and technologies." },
+  { term: "Operation Desert Storm", definition: "The 1991 U.S.-led military campaign to expel Iraq from Kuwait." },
+  { term: "North American Free Trade Agreement (NAFTA)", definition: "A 1994 trade pact reducing barriers between the U.S., Canada, and Mexico." },
+  { term: "2008 Financial Crisis", definition: "A global economic collapse caused by risky financial practices and a housing bubble." },
+  { term: "The ACA (Obamacare)", definition: "A 2010 law expanding healthcare access through mandates, subsidies, and Medicaid expansion." },
+  { term: "Black Lives Matter", definition: "A movement protesting police violence and systemic racism against African Americans." },
+  { term: "Generational criticism", definition: "A long-standing pattern in which older generations criticize younger ones for being irresponsible or culturally threatening, seen with Boomers, Gen X, Millennials, Gen Z, and now Gen Alpha." },
+  { term: "Woodstock the concert", definition: "A 1969 music festival symbolizing youth counterculture and antiwar sentiment." },
+  { term: "COVID 19", definition: "A global pandemic beginning in 2019, causing widespread death, economic disruption, and polarization." },
+  { term: "January 6th", definition: "The 2021 attack on the U.S. Capitol by Trump supporters attempting to overturn the election." },
+  { term: "Bataan Death March", definition: "The 1942 forced march of U.S. and Filipino POWs by Japan; many captured U.S. soldiers were from New Mexico." },
+  { term: "DOGE (Department of Government Efficiency)", definition: "A fictional agency from Vonnegut’s 'Player Piano' critiquing bureaucratic power and automation." },
+];
+
+let cards = FLASHCARDS.slice();
+let index = 0;
+let show = false;
+
+const termEl = document.getElementById('term');
+const defEl = document.getElementById('definition');
+const progEl = document.getElementById('progress');
+const showBtn = document.getElementById('showBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const copyBtn = document.getElementById('copyBtn');
+
+function render() {
+  const c = cards[index];
+  progEl.textContent = `Card ${index+1} of ${cards.length}`;
+  termEl.textContent = c.term;
+  defEl.textContent = show ? c.definition : '(Press Space or click “Show Answer”)';
+  showBtn.textContent = show ? 'Hide Answer' : 'Show Answer';
+}
+
+function nextCard() { show = false; index = (index + 1) % cards.length; render(); }
+function prevCard() { show = false; index = (index - 1 + cards.length) % cards.length; render(); }
+function shuffleCards() {
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  index = 0; show = false; render();
+}
+function copyQuizlet() {
+  const text = cards.map(c => `${c.term}\t${c.definition}`).join('\n');
+  navigator.clipboard.writeText(text);
+  alert('Copied flashcards for Quizlet — paste into Quizlet import.');
+}
+
+showBtn.addEventListener('click', () => { show = !show; render(); });
+prevBtn.addEventListener('click', prevCard);
+nextBtn.addEventListener('click', nextCard);
+shuffleBtn.addEventListener('click', shuffleCards);
+copyBtn.addEventListener('click', copyQuizlet);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key.toLowerCase() === 's') shuffleCards();
+  if (e.key === ' ') { show = !show; render(); e.preventDefault(); }
+});
+
+render();
+</script>
+
+</body>
+</html>
